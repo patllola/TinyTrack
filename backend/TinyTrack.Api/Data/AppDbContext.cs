@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using TinyTrack.Api.Models;
+using TinyTrack.Api.Features.Feeding.Models;
 
 namespace TinyTrack.Api.Data;
 

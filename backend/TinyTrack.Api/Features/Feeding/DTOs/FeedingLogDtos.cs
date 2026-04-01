@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TinyTrack.Api.DTOs;
+namespace TinyTrack.Api.Features.Feeding.DTOs;
 
 public record CreateFeedingLogDto(
     [Required] DateTime FedAt,

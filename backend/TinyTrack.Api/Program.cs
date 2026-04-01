@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TinyTrack.Api.Data;
-using TinyTrack.Api.Endpoints;
-using TinyTrack.Api.Services;
+using TinyTrack.Api.Features.Feeding.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Neon"))
        .UseSnakeCaseNamingConvention());
+
+// Controllers
+builder.Services.AddControllers();
 
 // Services
 builder.Services.AddScoped<FeedingLogService>();
@@ -44,7 +46,7 @@ app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TinyTrack A
 
 app.UseCors();
 
-app.MapFeedingLogEndpoints();
+app.MapControllers();
 
 app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
    .WithTags("Health");

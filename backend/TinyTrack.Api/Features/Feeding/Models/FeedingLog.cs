@@ -1,4 +1,4 @@
-namespace TinyTrack.Api.Models;
+namespace TinyTrack.Api.Features.Feeding.Models;
 
 public sealed class FeedingLog
 {

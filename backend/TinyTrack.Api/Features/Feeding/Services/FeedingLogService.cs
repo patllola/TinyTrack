@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using TinyTrack.Api.Data;
-using TinyTrack.Api.DTOs;
-using TinyTrack.Api.Models;
+using TinyTrack.Api.Features.Feeding.DTOs;
+using TinyTrack.Api.Features.Feeding.Models;
 
-namespace TinyTrack.Api.Services;
+namespace TinyTrack.Api.Features.Feeding.Services;
 
 public class FeedingLogService(AppDbContext db)
 {
