@@ -16,6 +16,7 @@ builder.Services.AddControllers();
 // Services
 builder.Services.AddScoped<FeedingLogService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<AuthService>();
 
 // CORS — allow Next.js dev server and production frontend
 builder.Services.AddCors(opt =>

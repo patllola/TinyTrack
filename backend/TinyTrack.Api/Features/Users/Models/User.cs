@@ -14,6 +14,9 @@ public class User
     [EmailAddress]
     [MaxLength(255)]
     public string Email { get; set; } = string.Empty;
+
+    [Required]
+    public string PasswordHash { get; set; } = string.Empty;
     
     public string? ProfilePictureUrl { get; set; }
 

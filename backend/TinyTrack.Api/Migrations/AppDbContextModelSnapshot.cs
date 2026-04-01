@@ -113,6 +113,11 @@ namespace TinyTrack.Api.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("gender");
 
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("password_hash");
+
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
