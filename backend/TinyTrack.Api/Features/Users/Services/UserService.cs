@@ -21,6 +21,22 @@ public class UserService(AppDbContext dbContext)
             return (null, "not_found");
         }
 
+        // Check if another user already has this Email OR (FullName + PhoneNumber)
+        var duplicate = await dbContext.Users.FirstOrDefaultAsync(x => 
+            x.Id != userId && (
+                x.Email == input.Email || 
+                (x.PhoneNumber != null && x.PhoneNumber == input.PhoneNumber && x.FullName == input.FullName)
+            ));
+
+        if (duplicate != null)
+        {
+            if (duplicate.Email == input.Email)
+            {
+                return (null, "email_already_exists");
+            }
+            return (null, "user_already_exists_with_this_name_and_phone");
+        }
+
         user.FullName = input.FullName;
         user.Email = input.Email;
         user.ProfilePictureUrl = input.ProfilePictureUrl;

@@ -6,6 +6,8 @@ public class User
 {
     public Guid Id { get; set; }
     
+    public int UserId { get; set; }
+    
     [Required]
     [MaxLength(100)]
     public string FullName { get; set; } = string.Empty;

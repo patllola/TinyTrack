@@ -54,4 +54,4 @@ app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
    .WithTags("Health");
 
-app.Run();
+app.Run("http://localhost:7000");
