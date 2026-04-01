@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TinyTrack.Api.Data;
 using TinyTrack.Api.Features.Feeding.Services;
+using TinyTrack.Api.Features.Users.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ builder.Services.AddControllers();
 
 // Services
 builder.Services.AddScoped<FeedingLogService>();
+builder.Services.AddScoped<UserService>();
 
 // CORS — allow Next.js dev server and production frontend
 builder.Services.AddCors(opt =>

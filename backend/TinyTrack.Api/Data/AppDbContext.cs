@@ -1,14 +1,26 @@
 using Microsoft.EntityFrameworkCore;
 using TinyTrack.Api.Features.Feeding.Models;
+using TinyTrack.Api.Features.Users.Models;
 
 namespace TinyTrack.Api.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<FeedingLog> FeedingLogs => Set<FeedingLog>();
+    public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+        builder.Entity<User>(e =>
+        {
+            e.ToTable("users");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("NOW()");
+            e.Property(x => x.UpdatedAt).HasDefaultValueSql("NOW()");
+            e.HasIndex(x => x.Email).IsUnique();
+        });
+
         builder.Entity<FeedingLog>(e =>
         {
             e.ToTable("feeding_logs");
