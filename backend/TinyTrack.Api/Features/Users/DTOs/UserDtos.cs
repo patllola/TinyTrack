@@ -3,7 +3,8 @@ using System.ComponentModel.DataAnnotations;
 namespace TinyTrack.Api.Features.Users.DTOs;
 
 public record UserProfileResponseDto(
-    Guid Id,
+    int Id,
+    Guid GuidId,
     string FullName,
     string Email,
     string? ProfilePictureUrl,

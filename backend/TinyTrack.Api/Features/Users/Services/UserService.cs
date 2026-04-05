@@ -7,15 +7,15 @@ namespace TinyTrack.Api.Features.Users.Services;
 
 public class UserService(AppDbContext dbContext)
 {
-    public async Task<UserProfileResponseDto?> GetProfileAsync(Guid userId)
+    public async Task<UserProfileResponseDto?> GetProfileAsync(Guid guidId)
     {
-        var user = await dbContext.Users.FindAsync(userId);
+        var user = await dbContext.Users.FirstOrDefaultAsync(x => x.GuidId == guidId);
         return user == null ? null : MapToDto(user);
     }
 
-    public async Task<(UserProfileResponseDto? dto, string? error)> UpdateProfileAsync(Guid userId, UpdateUserProfileDto input)
+    public async Task<(UserProfileResponseDto? dto, string? error)> UpdateProfileAsync(Guid guidId, UpdateUserProfileDto input)
     {
-        var user = await dbContext.Users.FindAsync(userId);
+        var user = await dbContext.Users.FirstOrDefaultAsync(x => x.GuidId == guidId);
         if (user == null)
         {
             return (null, "not_found");
@@ -23,7 +23,7 @@ public class UserService(AppDbContext dbContext)
 
         // Check if another user already has this Email OR (FullName + PhoneNumber)
         var duplicate = await dbContext.Users.FirstOrDefaultAsync(x => 
-            x.Id != userId && (
+            x.GuidId != guidId && (
                 x.Email == input.Email || 
                 (x.PhoneNumber != null && x.PhoneNumber == input.PhoneNumber && x.FullName == input.FullName)
             ));
@@ -54,7 +54,8 @@ public class UserService(AppDbContext dbContext)
 
     private static UserProfileResponseDto MapToDto(User user) =>
         new(
-            user.Id, 
+            user.Id,
+            user.GuidId, 
             user.FullName, 
             user.Email, 
             user.ProfilePictureUrl, 

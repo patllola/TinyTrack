@@ -51,6 +51,7 @@ public class AuthService(AppDbContext dbContext)
     private static UserProfileResponseDto MapToProfileDto(User user) =>
         new(
             user.Id,
+            user.GuidId,
             user.FullName,
             user.Email,
             user.ProfilePictureUrl,

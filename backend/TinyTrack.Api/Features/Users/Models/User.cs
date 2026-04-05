@@ -4,9 +4,9 @@ namespace TinyTrack.Api.Features.Users.Models;
 
 public class User
 {
-    public Guid Id { get; set; }
+    public Guid GuidId { get; set; }
     
-    public int UserId { get; set; }
+    public int Id { get; set; }
     
     [Required]
     [MaxLength(100)]
@@ -18,8 +18,10 @@ public class User
     public string Email { get; set; } = string.Empty;
 
     [Required]
+    [StringLength(255, MinimumLength = 6)]
     public string PasswordHash { get; set; } = string.Empty;
     
+    [StringLength(600)]
     public string? ProfilePictureUrl { get; set; }
 
     [MaxLength(20)]
