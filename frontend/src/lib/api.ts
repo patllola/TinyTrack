@@ -1,6 +1,7 @@
 import type { CreateFeedingLogPayload, FeedingLog, UpdateFeedingLogPayload } from "@/types/feeding";
+import type { AuthResponse, LoginPayload, RegisterPayload, UpdateProfilePayload, UserProfile } from "@/types/user";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:7000";
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
@@ -16,6 +17,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  // Feeding logs
   getLogs: () =>
     apiFetch<FeedingLog[]>("/api/feeding-logs"),
 
@@ -36,4 +38,27 @@ export const api = {
 
   deleteLog: (id: string) =>
     apiFetch<void>(`/api/feeding-logs/${id}`, { method: "DELETE" }),
+
+  // Auth
+  login: (body: LoginPayload) =>
+    apiFetch<AuthResponse>("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  register: (body: RegisterPayload) =>
+    apiFetch<AuthResponse>("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  // User profile
+  getProfile: () =>
+    apiFetch<UserProfile>("/api/users/GetMyProfile"),
+
+  updateProfile: (body: UpdateProfilePayload) =>
+    apiFetch<UserProfile>("/api/users/UpdateMyProfile", {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
 };

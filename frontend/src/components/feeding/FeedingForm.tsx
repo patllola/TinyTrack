@@ -21,9 +21,10 @@ function toLocalDatetimeValue(d: Date): string {
 
 interface FeedingFormProps {
   initialLog?: FeedingLog;
+  hideCancel?: boolean;
 }
 
-export default function FeedingForm({ initialLog }: FeedingFormProps) {
+export default function FeedingForm({ initialLog, hideCancel = false }: FeedingFormProps) {
   const router = useRouter();
   const isEdit = !!initialLog;
 
@@ -185,15 +186,17 @@ export default function FeedingForm({ initialLog }: FeedingFormProps) {
         <Button type="submit" size="lg" loading={loading} className="flex-1">
           {isEdit ? "Save Changes" : "Save Feeding Log"}
         </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          size="lg"
-          onClick={handleCancel}
-          disabled={loading}
-        >
-          Cancel
-        </Button>
+        {!hideCancel && (
+          <Button
+            type="button"
+            variant="secondary"
+            size="lg"
+            onClick={handleCancel}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+        )}
       </div>
     </form>
   );
