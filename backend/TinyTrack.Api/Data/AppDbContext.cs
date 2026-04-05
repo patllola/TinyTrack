@@ -27,7 +27,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             e.ToTable("feeding_logs");
             e.HasKey(x => x.Id);
-            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.GuidId).HasDefaultValueSql("gen_random_uuid()");
+            e.HasIndex(x => x.GuidId).IsUnique();
             e.Property(x => x.MilkPrepared).HasColumnType("numeric(6,1)");
             e.Property(x => x.MilkFed).HasColumnType("numeric(6,1)");
             e.Property(x => x.CreatedAt).HasDefaultValueSql("NOW()");
