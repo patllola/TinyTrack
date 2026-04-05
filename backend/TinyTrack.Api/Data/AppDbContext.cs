@@ -37,4 +37,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(x => x.FedAt).HasDatabaseName("idx_feeding_logs_fed_at");
         });
     }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        foreach (var entry in ChangeTracker.Entries<FeedingLog>())
+            if (entry.State == EntityState.Modified)
+                entry.Entity.UpdatedAt = DateTime.UtcNow;
+
+        return base.SaveChangesAsync(cancellationToken);
+    }
 }

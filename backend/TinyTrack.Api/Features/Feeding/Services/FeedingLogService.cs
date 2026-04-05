@@ -7,9 +7,11 @@ namespace TinyTrack.Api.Features.Feeding.Services;
 
 public class FeedingLogService(AppDbContext db)
 {
-    public async Task<List<FeedingLogResponseDto>> GetAllAsync() =>
+    public async Task<List<FeedingLogResponseDto>> GetAllAsync(int page = 1, int pageSize = 50) =>
         await db.FeedingLogs
             .OrderByDescending(x => x.FedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(x => ToDto(x))
             .ToListAsync();
 
@@ -19,14 +21,14 @@ public class FeedingLogService(AppDbContext db)
             .Select(x => ToDto(x))
             .FirstOrDefaultAsync();
 
-    public async Task<(FeedingLogResponseDto? dto, string? error)> CreateAsync(CreateFeedingLogDto input)
+    public async Task<(FeedingLogResponseDto? dto, ValidationError? error)> CreateAsync(CreateFeedingLogDto input)
     {
         var error = Validate(input.MilkPrepared, input.MilkFed, input.FedAt);
         if (error is not null) return (null, error);
 
         var log = new FeedingLog
         {
-            FedAt = input.FedAt.ToUniversalTime(),
+            FedAt = DateTime.SpecifyKind(input.FedAt, DateTimeKind.Utc),
             MilkPrepared = input.MilkPrepared,
             MilkFed = input.MilkFed,
             Notes = input.Notes,
@@ -39,44 +41,41 @@ public class FeedingLogService(AppDbContext db)
         return (ToDto(log), null);
     }
 
-    public async Task<(FeedingLogResponseDto? dto, string? error)> UpdateAsync(Guid guidId, UpdateFeedingLogDto input)
+    public async Task<(FeedingLogResponseDto? dto, string? notFound, ValidationError? error)> UpdateAsync(Guid guidId, UpdateFeedingLogDto input)
     {
         var log = await db.FeedingLogs.FirstOrDefaultAsync(x => x.GuidId == guidId);
-        if (log is null) return (null, "not_found");
+        if (log is null) return (null, "not_found", null);
 
         var newPrepared = input.MilkPrepared ?? log.MilkPrepared;
         var newFed = input.MilkFed ?? log.MilkFed;
         var newFedAt = input.FedAt ?? log.FedAt;
 
         var error = Validate(newPrepared, newFed, newFedAt);
-        if (error is not null) return (null, error);
+        if (error is not null) return (null, null, error);
 
-        log.FedAt = newFedAt.ToUniversalTime();
+        log.FedAt = DateTime.SpecifyKind(newFedAt, DateTimeKind.Utc);
         log.MilkPrepared = newPrepared;
         log.MilkFed = newFed;
         log.Notes = input.Notes ?? log.Notes;
-        log.UpdatedAt = DateTime.UtcNow;
 
         await db.SaveChangesAsync();
-        return (ToDto(log), null);
+        return (ToDto(log), null, null);
     }
 
     public async Task<bool> DeleteAsync(Guid guidId)
     {
-        var log = await db.FeedingLogs.FirstOrDefaultAsync(x => x.GuidId == guidId);
-        if (log is null) return false;
-
-        db.FeedingLogs.Remove(log);
-        await db.SaveChangesAsync();
-        return true;
+        var deleted = await db.FeedingLogs
+            .Where(x => x.GuidId == guidId)
+            .ExecuteDeleteAsync();
+        return deleted > 0;
     }
 
-    private static string? Validate(decimal prepared, decimal fed, DateTime fedAt)
+    private static ValidationError? Validate(decimal prepared, decimal fed, DateTime fedAt)
     {
-        if (prepared <= 0) return "milkPrepared must be greater than 0";
-        if (fed < 0) return "milkFed cannot be negative";
-        if (fed > prepared) return "milkFed cannot exceed milkPrepared";
-        if (fedAt > DateTime.UtcNow.AddMinutes(5)) return "fedAt cannot be in the future";
+        if (prepared <= 0) return new("milkPrepared", "Must be greater than 0");
+        if (fed < 0) return new("milkFed", "Cannot be negative");
+        if (fed > prepared) return new("milkFed", "Cannot exceed milk prepared");
+        if (fedAt > DateTime.UtcNow.AddMinutes(5)) return new("fedAt", "Cannot be in the future");
         return null;
     }
 
@@ -92,3 +91,5 @@ public class FeedingLogService(AppDbContext db)
         x.UpdatedAt
     );
 }
+
+public record ValidationError(string Field, string Message);

@@ -7,6 +7,7 @@ import Input from "@/components/ui/Input";
 import Textarea from "@/components/ui/Textarea";
 import Button from "@/components/ui/Button";
 import { api } from "@/lib/api";
+import { FeedingLog } from "@/types/feeding";
 
 type FormErrors = {
   fedAt?: string;
@@ -18,16 +19,39 @@ function toLocalDatetimeValue(d: Date): string {
   return format(d, "yyyy-MM-dd'T'HH:mm");
 }
 
-export default function FeedingForm() {
+interface FeedingFormProps {
+  initialLog?: FeedingLog;
+}
+
+export default function FeedingForm({ initialLog }: FeedingFormProps) {
   const router = useRouter();
+  const isEdit = !!initialLog;
+
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
 
-  const [fedAt, setFedAt] = useState(toLocalDatetimeValue(new Date()));
-  const [milkPrepared, setMilkPrepared] = useState("");
-  const [milkFed, setMilkFed] = useState("");
-  const [notes, setNotes] = useState("");
+  const [fedAt, setFedAt] = useState(
+    initialLog ? toLocalDatetimeValue(new Date(initialLog.fedAt)) : toLocalDatetimeValue(new Date())
+  );
+  const [milkPrepared, setMilkPrepared] = useState(initialLog ? String(initialLog.milkPrepared) : "");
+  const [milkFed, setMilkFed] = useState(initialLog ? String(initialLog.milkFed) : "");
+  const [notes, setNotes] = useState(initialLog?.notes ?? "");
+
+  function isDirty(): boolean {
+    if (!isEdit) return !!(fedAt || milkPrepared || milkFed || notes);
+    return (
+      fedAt !== toLocalDatetimeValue(new Date(initialLog!.fedAt)) ||
+      milkPrepared !== String(initialLog!.milkPrepared) ||
+      milkFed !== String(initialLog!.milkFed) ||
+      notes !== (initialLog!.notes ?? "")
+    );
+  }
+
+  function handleCancel() {
+    if (isDirty() && !confirm("You have unsaved changes. Discard them?")) return;
+    router.back();
+  }
 
   function validate(): boolean {
     const e: FormErrors = {};
@@ -48,12 +72,21 @@ export default function FeedingForm() {
     setApiError(null);
 
     try {
-      await api.createLog({
-        fedAt: new Date(fedAt).toISOString(),
-        milkPrepared: Number(milkPrepared),
-        milkFed: Number(milkFed),
-        notes: notes.trim() || undefined,
-      });
+      if (isEdit) {
+        await api.updateLog(initialLog!.id, {
+          fedAt: new Date(fedAt).toISOString(),
+          milkPrepared: Number(milkPrepared),
+          milkFed: Number(milkFed),
+          notes: notes.trim() || undefined,
+        });
+      } else {
+        await api.createLog({
+          fedAt: new Date(fedAt).toISOString(),
+          milkPrepared: Number(milkPrepared),
+          milkFed: Number(milkFed),
+          notes: notes.trim() || undefined,
+        });
+      }
       router.push("/");
       router.refresh();
     } catch (err) {
@@ -150,13 +183,13 @@ export default function FeedingForm() {
 
       <div className="flex gap-3 pt-2">
         <Button type="submit" size="lg" loading={loading} className="flex-1">
-          Save Feeding Log
+          {isEdit ? "Save Changes" : "Save Feeding Log"}
         </Button>
         <Button
           type="button"
           variant="secondary"
           size="lg"
-          onClick={() => router.back()}
+          onClick={handleCancel}
           disabled={loading}
         >
           Cancel

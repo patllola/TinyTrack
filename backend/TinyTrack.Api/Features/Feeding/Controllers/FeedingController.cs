@@ -11,9 +11,9 @@ public class FeedingController(FeedingLogService feedingLogService) : Controller
 {
     [HttpGet]
     [ProducesResponseType(typeof(List<FeedingLogResponseDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(int page = 1, int pageSize = 50)
     {
-        var logs = await feedingLogService.GetAllAsync();
+        var logs = await feedingLogService.GetAllAsync(page < 1 ? 1 : page, pageSize < 1 || pageSize > 100 ? 50 : pageSize);
         return Ok(logs);
     }
 
@@ -28,31 +28,30 @@ public class FeedingController(FeedingLogService feedingLogService) : Controller
 
     [HttpPost]
     [ProducesResponseType(typeof(FeedingLogResponseDto), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create(CreateFeedingLogDto input)
     {
         var (dto, error) = await feedingLogService.CreateAsync(input);
-        if (error != null)
+        if (error is not null)
         {
-            return BadRequest(new { error });
+            ModelState.AddModelError(error.Field, error.Message);
+            return ValidationProblem();
         }
         return CreatedAtAction(nameof(GetById), new { id = dto!.GuidId }, dto);
     }
 
     [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(FeedingLogResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(Guid id, UpdateFeedingLogDto input)
     {
-        var (dto, error) = await feedingLogService.UpdateAsync(id, input);
-        if (error == "not_found")
+        var (dto, notFound, error) = await feedingLogService.UpdateAsync(id, input);
+        if (notFound is not null) return NotFound();
+        if (error is not null)
         {
-            return NotFound();
-        }
-        if (error != null)
-        {
-            return BadRequest(new { error });
+            ModelState.AddModelError(error.Field, error.Message);
+            return ValidationProblem();
         }
         return Ok(dto);
     }

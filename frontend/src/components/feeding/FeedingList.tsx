@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { FeedingLog } from "@/types/feeding";
+import { api } from "@/lib/api";
 import FeedingCard from "./FeedingCard";
 import EmptyState from "@/components/layout/EmptyState";
 import { formatDate } from "@/lib/utils";
@@ -18,7 +21,22 @@ function groupByDate(logs: FeedingLog[]): Record<string, FeedingLog[]> {
   }, {});
 }
 
-export default function FeedingList({ logs }: FeedingListProps) {
+export default function FeedingList({ logs: initialLogs }: FeedingListProps) {
+  const router = useRouter();
+  const [logs, setLogs] = useState(initialLogs);
+
+  async function handleDelete(id: string) {
+    const snapshot = logs;
+    setLogs((prev) => prev.filter((l) => l.id !== id));
+    try {
+      await api.deleteLog(id);
+      router.refresh();
+    } catch {
+      setLogs(snapshot);
+      alert("Failed to delete. Please try again.");
+    }
+  }
+
   if (logs.length === 0) return <EmptyState />;
 
   const grouped = groupByDate(logs);
@@ -34,7 +52,7 @@ export default function FeedingList({ logs }: FeedingListProps) {
           </div>
           <div className="space-y-3">
             {dateLogs.map((log) => (
-              <FeedingCard key={log.id} log={log} />
+              <FeedingCard key={log.id} log={log} onDelete={handleDelete} />
             ))}
           </div>
         </section>

@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import { api } from "@/lib/api";
 import StatsBar from "@/components/feeding/StatsBar";
 import FeedingList from "@/components/feeding/FeedingList";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Dashboard — TinyTrack",
+};
 
 export default async function DashboardPage() {
   let logs = [];
