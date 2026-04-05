@@ -2,7 +2,8 @@ namespace TinyTrack.Api.Features.Feeding.Models;
 
 public sealed class FeedingLog
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
+    public Guid GuidId { get; set; } = Guid.NewGuid();
     public DateTime FedAt { get; set; }
     public decimal MilkPrepared { get; set; }
     public decimal MilkFed { get; set; }

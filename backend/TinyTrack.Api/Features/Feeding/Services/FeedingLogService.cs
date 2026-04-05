@@ -13,9 +13,9 @@ public class FeedingLogService(AppDbContext db)
             .Select(x => ToDto(x))
             .ToListAsync();
 
-    public async Task<FeedingLogResponseDto?> GetByIdAsync(Guid id) =>
+    public async Task<FeedingLogResponseDto?> GetByIdAsync(Guid guidId) =>
         await db.FeedingLogs
-            .Where(x => x.Id == id)
+            .Where(x => x.GuidId == guidId)
             .Select(x => ToDto(x))
             .FirstOrDefaultAsync();
 
@@ -39,9 +39,9 @@ public class FeedingLogService(AppDbContext db)
         return (ToDto(log), null);
     }
 
-    public async Task<(FeedingLogResponseDto? dto, string? error)> UpdateAsync(Guid id, UpdateFeedingLogDto input)
+    public async Task<(FeedingLogResponseDto? dto, string? error)> UpdateAsync(Guid guidId, UpdateFeedingLogDto input)
     {
-        var log = await db.FeedingLogs.FindAsync(id);
+        var log = await db.FeedingLogs.FirstOrDefaultAsync(x => x.GuidId == guidId);
         if (log is null) return (null, "not_found");
 
         var newPrepared = input.MilkPrepared ?? log.MilkPrepared;
@@ -61,9 +61,9 @@ public class FeedingLogService(AppDbContext db)
         return (ToDto(log), null);
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid guidId)
     {
-        var log = await db.FeedingLogs.FindAsync(id);
+        var log = await db.FeedingLogs.FirstOrDefaultAsync(x => x.GuidId == guidId);
         if (log is null) return false;
 
         db.FeedingLogs.Remove(log);
@@ -82,6 +82,7 @@ public class FeedingLogService(AppDbContext db)
 
     private static FeedingLogResponseDto ToDto(FeedingLog x) => new(
         x.Id,
+        x.GuidId,
         x.FedAt,
         x.MilkPrepared,
         x.MilkFed,

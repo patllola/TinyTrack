@@ -17,7 +17,8 @@ public record UpdateFeedingLogDto(
 );
 
 public record FeedingLogResponseDto(
-    Guid Id,
+    int Id,
+    Guid GuidId,
     DateTime FedAt,
     decimal MilkPrepared,
     decimal MilkFed,
