@@ -36,7 +36,7 @@ public class FeedingController(FeedingLogService feedingLogService) : Controller
         {
             return BadRequest(new { error });
         }
-        return CreatedAtAction(nameof(GetById), new { id = dto!.Id }, dto);
+        return CreatedAtAction(nameof(GetById), new { id = dto!.GuidId }, dto);
     }
 
     [HttpPut("{id:guid}")]
