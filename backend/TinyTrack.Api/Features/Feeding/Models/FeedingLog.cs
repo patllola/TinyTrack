@@ -1,7 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace TinyTrack.Api.Features.Feeding.Models;
 
 public sealed class FeedingLog
 {
+    [Key]
     public int Id { get; set; }
     public Guid GuidId { get; set; } = Guid.NewGuid();
     public DateTime FedAt { get; set; }

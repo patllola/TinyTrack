@@ -4,9 +4,10 @@ namespace TinyTrack.Api.Features.Users.Models;
 
 public class User
 {
-    public Guid GuidId { get; set; }
-    
+    [Key]
     public int Id { get; set; }
+    
+    public Guid GuidId { get; set; } = Guid.NewGuid();
     
     [Required]
     [MaxLength(100)]
